@@ -3,7 +3,7 @@ package service.impl;
 import exception.NotFoundException;
 import exception.RepetitiveUsernameException;
 import model.Student;
-import model.dto.StudentCourseAndGrades;
+import model.dto.StudentCourseGrades;
 import model.dto.StudentDto;
 import repository.StudentRepository;
 import service.StudentService;
@@ -114,7 +114,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Set<StudentCourseAndGrades> seeStudentGrad(Long studentId) {
+    public Set<StudentCourseGrades> seeStudentGrad(Long studentId) {
         try {
              return studentRepository.seeStudentGrad(studentId);
         } catch (SQLException e) {

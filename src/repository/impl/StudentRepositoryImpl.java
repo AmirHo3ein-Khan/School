@@ -4,7 +4,7 @@ import database.Database;
 import exception.NotFoundException;
 import exception.RepetitiveUsernameException;
 import model.Student;
-import model.dto.StudentCourseAndGrades;
+import model.dto.StudentCourseGrades;
 import repository.StudentRepository;
 import util.Printer;
 import java.sql.PreparedStatement;
@@ -173,13 +173,13 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public Set<StudentCourseAndGrades> seeStudentGrad(Long studentId) throws SQLException {
+    public Set<StudentCourseGrades> seeStudentGrad(Long studentId) throws SQLException {
         PreparedStatement pr = this.database.getPreparedStatement(Constant.SEE_GRAD_OF_STUDENT);
         pr.setLong(1,studentId);
         ResultSet resultSet = pr.executeQuery();
-        Set<StudentCourseAndGrades> studentCourseAndGrades = new HashSet<>();
+        Set<StudentCourseGrades> studentCourseAndGrades = new HashSet<>();
         while (resultSet.next()){
-            StudentCourseAndGrades student = new StudentCourseAndGrades();
+            StudentCourseGrades student = new StudentCourseGrades();
             student.setCourseTitle(resultSet.getString("course_title"));
             student.setGrade(resultSet.getDouble("student_grade"));
             studentCourseAndGrades.add(student);

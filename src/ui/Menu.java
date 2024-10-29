@@ -115,7 +115,7 @@ public class Menu {
                 Printer.printLine1("~~~~~~~~~~~~~~~~~~~~~");
                 break;
             case 3:
-                Set<StudentCourseAndGrades> studentCourseAndGrades = ApplicationContext.getStudentService().seeStudentGrad(student.getId());
+                Set<StudentCourseGrades> studentCourseAndGrades = ApplicationContext.getStudentService().seeStudentGrad(student.getId());
                 System.out.println(String.format(CYAN + "%-12s | %-12s", "courseTitle", "grade"+ RESET));
                 Printer.printLine(20);
                 Printer.printSet(studentCourseAndGrades);

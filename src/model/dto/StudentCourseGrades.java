@@ -1,15 +1,15 @@
 package model.dto;
 
-public class StudentCourseAndGrades {
+public class StudentCourseGrades {
     private String courseTitle;
     private Double grade;
 
-    public StudentCourseAndGrades(String courseTitle, Double grade) {
+    public StudentCourseGrades(String courseTitle, Double grade) {
         this.courseTitle = courseTitle;
         this.grade = grade;
     }
 
-    public StudentCourseAndGrades() {
+    public StudentCourseGrades() {
     }
 
     public String getCourseTitle() {
