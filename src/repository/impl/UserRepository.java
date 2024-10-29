@@ -29,4 +29,10 @@ public class UserRepository {
         }
         return id;
     }
+    public void updatePassword(String newPassword,String nationalCode) throws SQLException {
+        PreparedStatement pr = this.database.getPreparedStatement(Constant.UPDATE_PASSWORD);
+        pr.setString(1,newPassword);
+        pr.setString(2,nationalCode);
+        pr.executeUpdate();
+    }
 }

@@ -96,15 +96,6 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public void studentGetCourse(Long studentId, Long courseId) {
-        try {
-            this.courseRepository.studentGetCourse(studentId , courseId);
-        } catch (SQLException e) {
-            Printer.printError(e.getMessage());
-        }
-    }
-
-    @Override
     public void deleteStudentCourse(Long id) {
         try {
             this.courseRepository.deleteStudentCourse(id);

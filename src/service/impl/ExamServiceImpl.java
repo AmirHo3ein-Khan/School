@@ -122,4 +122,24 @@ public class ExamServiceImpl implements ExamService {
         }
         return examsDto;
     }
+
+    @Override
+    public void addGradeForStudent(Long studentId, Long examId, Double grade) {
+        try {
+            this.examRepository.addGradeForStudent(studentId , examId , grade);
+        } catch (SQLException e) {
+            Printer.printError(e.getMessage());
+        }
+    }
+
+    @Override
+    public Long getExamIdThatTeacherTeach(Long teacherId){
+        Long examIdThatTeacherTeach = 0L;
+        try {
+            examIdThatTeacherTeach = this.examRepository.getExamIdThatTeacherTeach(teacherId);
+        } catch (SQLException e) {
+            Printer.printError(e.getMessage());
+        }
+        return examIdThatTeacherTeach;
+    }
 }

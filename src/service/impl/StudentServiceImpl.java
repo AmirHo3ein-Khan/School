@@ -1,10 +1,13 @@
 package service.impl;
 
 import exception.NotFoundException;
+import exception.RepetitiveUsernameException;
 import model.Student;
+import model.dto.StudentCourseAndGrades;
 import model.dto.StudentDto;
 import repository.StudentRepository;
 import service.StudentService;
+import util.Printer;
 
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -22,8 +25,8 @@ public class StudentServiceImpl implements StudentService {
     public void creat(Student entity) {
         try {
             studentRepository.creat(entity);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException | RepetitiveUsernameException e) {
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -32,7 +35,7 @@ public class StudentServiceImpl implements StudentService {
         try {
             studentRepository.update(entity);
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -53,7 +56,7 @@ public class StudentServiceImpl implements StudentService {
                 return Optional.of(studentDto);
             }
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return Optional.empty();
     }
@@ -64,7 +67,7 @@ public class StudentServiceImpl implements StudentService {
         try {
             studentRepository.delete(id);
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -86,7 +89,7 @@ public class StudentServiceImpl implements StudentService {
             }
             return studentsDto;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return studentsDto;
     }
@@ -97,8 +100,25 @@ public class StudentServiceImpl implements StudentService {
         try {
             count = this.studentRepository.getCount();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return count;
+    }
+    @Override
+    public void studentGetCourse(Long studentId, Long courseId) {
+        try {
+            this.studentRepository.studentGetCourse(studentId , courseId);
+        } catch (SQLException e) {
+            Printer.printError(e.getMessage());
+        }
+    }
+
+    @Override
+    public Set<StudentCourseAndGrades> seeStudentGrad(Long studentId) {
+        try {
+             return studentRepository.seeStudentGrad(studentId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

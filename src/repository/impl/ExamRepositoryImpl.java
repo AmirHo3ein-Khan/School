@@ -29,17 +29,17 @@ public class ExamRepositoryImpl implements ExamRepository {
 
     @Override
     public void update(Exam entity) throws SQLException, NotFoundException {
-        Optional<Exam> exam = findById(entity.getId());
-        if (exam.isPresent()) {
-            PreparedStatement pr = database.getPreparedStatement(Constant.UPDATE_EXAM);
-            pr.setLong(1, entity.getTeacherId());
-            pr.setLong(2, entity.getCourseId());
-            pr.setDate(3, entity.getDate());
-            pr.setLong(4, entity.getId());
-            pr.executeUpdate();
-            pr.close();
-        } else {
-            throw new NotFoundException(RED+"Exam with ID " + entity.getId() + " not found."+RESET);
+        try (PreparedStatement pr = database.getPreparedStatement(Constant.UPDATE_EXAM);) {
+            Optional<Exam> exam = findById(entity.getId());
+            if (exam.isPresent()) {
+                pr.setLong(1, entity.getTeacherId());
+                pr.setLong(2, entity.getCourseId());
+                pr.setDate(3, entity.getDate());
+                pr.setLong(4, entity.getId());
+                pr.executeUpdate();
+            } else {
+                throw new NotFoundException(RED + "Exam with ID " + entity.getId() + " not found." + RESET);
+            }
         }
     }
 
@@ -114,6 +114,27 @@ public class ExamRepositoryImpl implements ExamRepository {
             studentExams.add(exam);
         }
         return studentExams;
+    }
+
+    @Override
+    public void addGradeForStudent(Long studentId, Long examId, Double grade) throws SQLException {
+        PreparedStatement pr = this.database.getPreparedStatement(Constant.UPDATE_EXAM_GRADE);
+        pr.setDouble(1,grade);
+        pr.setLong(2,studentId);
+        pr.setLong(3,examId);
+        pr.executeUpdate();
+    }
+
+    @Override
+    public Long getExamIdThatTeacherTeach(Long teacherId) throws SQLException {
+        PreparedStatement pr = this.database.getPreparedStatement(Constant.GET_EXAM_ID_THAT_TEACHER_TEACH);
+        pr.setLong(1,teacherId);
+        ResultSet resultSet = pr.executeQuery();
+        Long examId = 0L;
+        while (resultSet.next()){
+            examId = resultSet.getLong("exam_id");
+        }
+        return examId;
     }
 
 }

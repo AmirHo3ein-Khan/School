@@ -1,10 +1,7 @@
 package ui;
 
 import model.*;
-import model.dto.CourseDto;
-import model.dto.ExamDto;
-import model.dto.StudentDto;
-import model.dto.TeacherDto;
+import model.dto.*;
 import model.enumtype.UserType;
 import util.ApplicationContext;
 import util.Printer;
@@ -32,16 +29,37 @@ public class Menu {
         String username = Utility.getString("Enter your username : ");
         String password = Utility.getString("Enter your password : ");
         Optional<User> loginUser = ApplicationContext.getLoginService().login(username, password);
+        if (loginUser.isPresent()){
         if (loginUser.get().getType().equals(UserType.MANAGER)) {
             managerAccess();
         } else if (loginUser.get().getType().equals(UserType.STUDENT)){
             studentAccess(loginUser.get());
         } else if (loginUser.get().getType().equals(UserType.TEACHER)) {
             teacherAccess(loginUser.get());
-        } else {
-            Printer.printError("your username or password is wrong pleas try again!");
-            singIn();
         }
+        } else {
+//            TODO CHANG PASSWORD
+            Printer.printError("your username or password is wrong please try again!");
+            Printer.printDescription("1.try again");
+            Printer.printDescription("2.Chang password");
+            int ch = Utility.getInt("Enter your choice : ");
+            switch (ch){
+                case 1 :
+                    singIn();
+                    break;
+                case 2 :
+                    changPassword();
+                    Printer.printDescription("login again");
+                    singIn();
+                    break;
+            }
+        }
+    }
+
+    private static void changPassword() {
+        String nationalCode = Utility.getString("Enter your national code for changing password : ");
+        String newPassword = Utility.getString("Enter your newPassword : ");
+        ApplicationContext.getLoginService().updatePassword(newPassword , nationalCode);
     }
 
     private static void teacherAccess(User teacher) {
@@ -49,15 +67,14 @@ public class Menu {
         int choice = Utility.getInt("Enter your choice : ");
         switch (choice) {
             case 1:
-                Long courseId = Utility.getLong("Enter the ID of the course from which the exam is to be taken : ");
                 String examDate = Utility.getString("Enter date of exam : ");
                 String[] splitExamDate = examDate.split("-");
                 Exam exam = new Exam();
                 exam.setTeacherId(teacher.getId());
-                exam.setCourseId(courseId);
+                exam.setCourseId(ApplicationContext.getTeacherService().getCourseIdThatTeacherTeach(teacher.getId()));
                 exam.setDate(new Date(
-                        Integer.parseInt(splitExamDate[0]),
-                        Integer.parseInt(splitExamDate[1]),
+                        Integer.parseInt(splitExamDate[0])-1900,
+                        Integer.parseInt(splitExamDate[1])-1,
                         Integer.parseInt(splitExamDate[2])
                 ));
 
@@ -67,6 +84,12 @@ public class Menu {
                 updateExam();
                 break;
             case 3:
+                Long studentId = Utility.getLong("Enter student ID : ");
+                Double studentGrade = Utility.getDouble("Enter grade of student : ");
+                Long examIdThatTeacherTeach = ApplicationContext.getExamService().getExamIdThatTeacherTeach(teacher.getId());
+                ApplicationContext.getExamService().addGradeForStudent(studentId , examIdThatTeacherTeach , studentGrade);
+                break;
+            case 4:
                 startProject();
                 break;
         }
@@ -78,28 +101,27 @@ public class Menu {
         int choice = Utility.getInt("Enter your choice : ");
         switch (choice) {
             case 1:
-                Long courseId = Utility.getLong("Enter id of course you want take : ");
-                ApplicationContext.getCourseService().studentGetCourse(student.getId() , courseId);
+                Set<ExamDto> allExamOfStudent = ApplicationContext.getExamService().getAllExamOfStudent(student.getId());
+                System.out.println(String.format(CYAN + "Exams\n" + "%-5s | %-20s | %-12s | %-12s",
+                        "Id", "teacher Name", "course title", "exam Date" + RESET));
+                Printer.printLine(35);
+                Printer.printSet(allExamOfStudent);
+                Printer.printLine(35);
                 break;
             case 2:
-                Long courseIdForDelete = Utility.getLong("Enter id of course you want delete : ");
-                ApplicationContext.getCourseService().deleteStudentCourse(courseIdForDelete);
-                break;
-            case 3:
-                Set<ExamDto> allExamOfStudent = ApplicationContext.getExamService().getAllExamOfStudent(student.getId());
-                System.out.println(String.format(CYAN + "Exams\n" + "%-5s | %-20s | %-12s | %-12s\n",
-                        "Id", "teacherFistName", "courseTitle", "examDate" + RESET));
-                Printer.printLine(70);
-                Printer.printSet(allExamOfStudent);
-                Printer.printLine(70);
-                break;
-            case 4:
                 Set<String> allCourseTitleOfStudent = ApplicationContext.getCourseService().getAllCourseTitleOfStudent(student.getId());
                 Printer.printLine1("~~~~~~~~~~~~~~~~~~~~~");
                 Printer.printSet(allCourseTitleOfStudent);
                 Printer.printLine1("~~~~~~~~~~~~~~~~~~~~~");
                 break;
-            case 5:
+            case 3:
+                Set<StudentCourseAndGrades> studentCourseAndGrades = ApplicationContext.getStudentService().seeStudentGrad(student.getId());
+                System.out.println(String.format(CYAN + "%-12s | %-12s", "courseTitle", "grade"+ RESET));
+                Printer.printLine(20);
+                Printer.printSet(studentCourseAndGrades);
+                Printer.printLine(20);
+                break;
+            case 4:
                 startProject();
                 break;
         }
@@ -107,7 +129,7 @@ public class Menu {
     }
 
     private static void managerAccess() {
-        Printer.printMenu(ApplicationContext.managerMenu, "WELCOME BOSS");
+        Printer.printMenu(ApplicationContext.managerMenu, "WELCOME Admin");
         int choice = Utility.getInt("Enter your choice : ");
         switch (choice) {
             case 1:
@@ -143,19 +165,30 @@ public class Menu {
                 deleteStudent();
                 break;
             case 4:
-                printAllStudent();
+                studentGetCourse();
                 break;
             case 5:
-                printCountOfStudent();
+                printAllStudent();
                 break;
             case 6:
-                printStudentFindById();
+                printCountOfStudent();
                 break;
             case 7:
+                printStudentFindById();
+                break;
+            case 8:
                 managerAccess();
                 break;
         }
         managerStudentsMenu();
+    }
+
+    private static void studentGetCourse() {
+        printAllStudent();
+        Long studentId = Utility.getLong("Enter student id for add course : ");
+        printAllCourse();
+        Long courseId = Utility.getLong("Enter course id for add student : ");
+        ApplicationContext.getStudentService().studentGetCourse(studentId , courseId);
     }
 
     private static void creatStudent() {
@@ -174,13 +207,13 @@ public class Menu {
         student.setLastName(lastName);
         student.setNationalCode(nationalCode);
         student.setDob(new Date(
-                Integer.parseInt(splitDob[0]),
-                Integer.parseInt(splitDob[1]),
+                Integer.parseInt(splitDob[0])-1900,
+                Integer.parseInt(splitDob[1])-1,
                 Integer.parseInt(splitDob[2])
         ));
         student.setEntryDate(new Date(
-                Integer.parseInt(splitEntryDate[0]),
-                Integer.parseInt(splitEntryDate[1]),
+                Integer.parseInt(splitEntryDate[0])-1900,
+                Integer.parseInt(splitEntryDate[1])-1,
                 Integer.parseInt(splitEntryDate[2])
         ));
         student.setUsername(username);
@@ -209,13 +242,13 @@ public class Menu {
         student.setLastName(lastName);
         student.setNationalCode(nationalCode);
         student.setDob(new Date(
-                Integer.parseInt(splitDob[0]),
-                Integer.parseInt(splitDob[1]),
+                Integer.parseInt(splitDob[0])-1900,
+                Integer.parseInt(splitDob[1])-1,
                 Integer.parseInt(splitDob[2])
         ));
         student.setEntryDate(new Date(
-                Integer.parseInt(splitEntryDate[0]),
-                Integer.parseInt(splitEntryDate[1]),
+                Integer.parseInt(splitEntryDate[0])-1900,
+                Integer.parseInt(splitEntryDate[1])-1,
                 Integer.parseInt(splitEntryDate[2])
         ));
         student.setUsername(username);
@@ -238,9 +271,9 @@ public class Menu {
         if (student.isPresent()) {
             System.out.println(String.format(CYAN + "*** Student *** \n" + "%-5s | %-12s | %-12s | %-14s | %-12s | %-12s | %-12s",
                     "Id", "firstName", "lastName", "nationalCode", "dob", "entryDate", "gpu"));
-            Printer.printLine(89);
+            Printer.printLine(44);
             System.out.println(BLUE + student.get() + RESET);
-            Printer.printLine(89);
+            Printer.printLine(44);
         }
     }
 
@@ -259,9 +292,9 @@ public class Menu {
         Set<StudentDto> all = ApplicationContext.getStudentService().getAll();
         System.out.println(String.format(CYAN + "*** Student *** \n" + "%-5s | %-12s | %-12s | %-14s | %-12s | %-12s | %-12s",
                 "Id", "firstName", "lastName", "nationalCode", "dob", "entryDate", "gpu"));
-        Printer.printLine(89);
+        Printer.printLine(44);
         Printer.printSet(all);
-        Printer.printLine(89);
+        Printer.printLine(44);
     }
 
 
@@ -295,29 +328,29 @@ public class Menu {
     }
 
     private static void creatTeacher() {
-        String firstName = Utility.getString("Enter student first name : ");
-        String lastName = Utility.getString("Enter student last name : ");
+        String firstName = Utility.getString("Enter teacher first name : ");
+        String lastName = Utility.getString("Enter teacher last name : ");
         Long courseId = Utility.getLong("Enter course id of teacher want to teach : ");
-        String nationalCode = Utility.getString("Enter student national code : ");
-        String dob = Utility.getString("Enter student date of birth YYYY-MM-DD : ");
+        String nationalCode = Utility.getString("Enter teacher national code : ");
+        String dob = Utility.getString("Enter teacher date of birth YYYY-MM-DD : ");
         String[] splitDob = dob.split("-");
-        String entryDate = Utility.getString("Enter student entry date : ");
+        String entryDate = Utility.getString("Enter teacher entry date : ");
         String[] splitEntryDate = entryDate.split("-");
-        String username = Utility.getString("Enter student username : ");
-        String password = Utility.getString("Enter student password : ");
+        String username = Utility.getString("Enter teacher username : ");
+        String password = Utility.getString("Enter teacher password : ");
         Teacher teacher = new Teacher();
         teacher.setFirstName(firstName);
         teacher.setLastName(lastName);
         teacher.setCourseId(courseId);
         teacher.setNationalCode(nationalCode);
         teacher.setDob(new Date(
-                Integer.parseInt(splitDob[0]),
-                Integer.parseInt(splitDob[1]),
+                Integer.parseInt(splitDob[0])-1900,
+                Integer.parseInt(splitDob[1])-1,
                 Integer.parseInt(splitDob[2])
         ));
         teacher.setEntryDate(new Date(
-                Integer.parseInt(splitEntryDate[0]),
-                Integer.parseInt(splitEntryDate[1]),
+                Integer.parseInt(splitEntryDate[0])-1900,
+                Integer.parseInt(splitEntryDate[1])-1,
                 Integer.parseInt(splitEntryDate[2])
         ));
         teacher.setUsername(username);
@@ -329,16 +362,16 @@ public class Menu {
     private static void updateTeacher() {
         printAllTeacher();
         Long id = Utility.getLong("Enter id of teacher you want update : ");
-        String firstName = Utility.getString("Enter student first name : ");
-        String lastName = Utility.getString("Enter student last name : ");
+        String firstName = Utility.getString("Enter teacher first name : ");
+        String lastName = Utility.getString("Enter teacher last name : ");
         Long courseId = Utility.getLong("Enter course id of teacher want to teach : ");
-        String nationalCode = Utility.getString("Enter student national code : ");
-        String dob = Utility.getString("Enter student date of birth YYYY-MM-DD : ");
+        String nationalCode = Utility.getString("Enter teacher national code : ");
+        String dob = Utility.getString("Enter teacher date of birth YYYY-MM-DD : ");
         String[] splitDob = dob.split("-");
-        String entryDate = Utility.getString("Enter student entry date : ");
+        String entryDate = Utility.getString("Enter teacher entry date : ");
         String[] splitEntryDate = entryDate.split("-");
-        String username = Utility.getString("Enter student username : ");
-        String password = Utility.getString("Enter student password : ");
+        String username = Utility.getString("Enter teacher username : ");
+        String password = Utility.getString("Enter teacher password : ");
         Teacher teacher = new Teacher();
         teacher.setId(id);
         teacher.setFirstName(firstName);
@@ -346,13 +379,13 @@ public class Menu {
         teacher.setCourseId(courseId);
         teacher.setNationalCode(nationalCode);
         teacher.setDob(new Date(
-                Integer.parseInt(splitDob[0]),
-                Integer.parseInt(splitDob[1]),
+                Integer.parseInt(splitDob[0])-1900,
+                Integer.parseInt(splitDob[1])-1,
                 Integer.parseInt(splitDob[2])
         ));
         teacher.setEntryDate(new Date(
-                Integer.parseInt(splitEntryDate[0]),
-                Integer.parseInt(splitEntryDate[1]),
+                Integer.parseInt(splitEntryDate[0])-1900,
+                Integer.parseInt(splitEntryDate[1])-1,
                 Integer.parseInt(splitEntryDate[2])
         ));
         teacher.setUsername(username);
@@ -373,11 +406,11 @@ public class Menu {
         Long id = Utility.getLong("Enter id of teacher you want find : ");
         Optional<TeacherDto> teacher = ApplicationContext.getTeacherService().findById(id);
         if (teacher.isPresent()) {
-            System.out.println(String.format(CYAN + " Teacher " + "%-5s | %-12s | %-12s | %-15s | %-12s | %-12s | %-12s",
+            System.out.println(String.format(CYAN + "*** Teacher ***\n" + "%-5s | %-12s | %-12s | %-15s | %-12s | %-12s | %-12s",
                     "Id", "firstName", "lastName", "nationalCode", "dob", "entryDate", "courseTitle" + RESET));
-            Printer.printLine(107);
+            Printer.printLine(52);
             System.out.println(BLUE + teacher.get() + RESET);
-            Printer.printLine(107);
+            Printer.printLine(52);
         }
     }
 
@@ -396,9 +429,9 @@ public class Menu {
         Set<TeacherDto> all = ApplicationContext.getTeacherService().getAll();
         System.out.println(String.format(CYAN + "*** Teachers ***\n" + "%-5s | %-12s | %-12s | %-15s | %-12s | %-12s | %-12s",
                 "Id", "firstName", "lastName", "nationalCode", "dob", "entryDate", "courseTitle"));
-        Printer.printLine(107);
+        Printer.printLine(52);
         Printer.printSet(all);
-        Printer.printLine(107);
+        Printer.printLine(52);
     }
 
 
@@ -466,9 +499,9 @@ public class Menu {
         Optional<CourseDto> course = ApplicationContext.getCourseService().findById(id);
         if (course.isPresent()) {
             System.out.println(String.format(CYAN + "Courses\n" + "%-5s | %-12s | %-12s", "Id", "courseTitle", "courseUnit" + RESET));
-            Printer.printLine(33);
+            Printer.printLine(17);
             System.out.println(BLUE + course.get() + RESET);
-            Printer.printLine(33);
+            Printer.printLine(17);
         }
     }
 
@@ -488,9 +521,9 @@ public class Menu {
 
         Set<CourseDto> all = ApplicationContext.getCourseService().getAll();
         System.out.println(String.format(CYAN + "Courses\n" + "%-5s | %-12s | %-12s ", "Id", "courseTitle", "courseUnit" + RESET));
-        Printer.printLine(33);
+        Printer.printLine(17);
         Printer.printSet(all);
-        Printer.printLine(33);
+        Printer.printLine(17);
     }
 
 
@@ -544,8 +577,8 @@ public class Menu {
         exam.setTeacherId(teacherId);
         exam.setCourseId(courseId);
         exam.setDate(new Date(
-                Integer.parseInt(splitExamDate[0]),
-                Integer.parseInt(splitExamDate[1]),
+                Integer.parseInt(splitExamDate[0])-1900,
+                Integer.parseInt(splitExamDate[1])-1,
                 Integer.parseInt(splitExamDate[2])
         ));
         ApplicationContext.getExamService().update(exam);
@@ -563,8 +596,8 @@ public class Menu {
         exam.setTeacherId(teacherId);
         exam.setCourseId(courseId);
         exam.setDate(new Date(
-                Integer.parseInt(splitExamDate[0]),
-                Integer.parseInt(splitExamDate[1]),
+                Integer.parseInt(splitExamDate[0])-1900,
+                Integer.parseInt(splitExamDate[1])-1,
                 Integer.parseInt(splitExamDate[2])
         ));
         ApplicationContext.getExamService().creat(exam);
@@ -588,9 +621,9 @@ public class Menu {
         if (exam.isPresent()) {
             System.out.println(String.format(CYAN + "Exams\n" + "%-5s | %-20s | %-12s | %-12s\n",
                     "Id", "teacherFullName", "courseTitle", "examDate" + RESET));
-            Printer.printLine(70);
+            Printer.printLine(35);
             System.out.println(exam.get());
-            Printer.printLine(70);
+            Printer.printLine(35);
         }
     }
 
@@ -598,9 +631,9 @@ public class Menu {
         Set<ExamDto> all = ApplicationContext.getExamService().getAll();
         System.out.println(String.format(CYAN + "Exams\n" + "%-5s | %-20s | %-12s | %-12s\n",
                 "Id", "teacherFullName", "courseTitle", "examDate" + RESET));
-        Printer.printLine(70);
+        Printer.printLine(35);
         Printer.printSet(all);
-        Printer.printLine(70);
+        Printer.printLine(35);
 
     }
 }

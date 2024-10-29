@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class ManagerRepositoryImpl implements ManagerRepository {
-    private final Database database = new Database();
+        private final Database database = new Database();
     @Override
     public Optional<Manager> findById(Long id) throws SQLException, NotFoundException {
         PreparedStatement pr = this.database.getPreparedStatement(Constant.FIND_MANAGER);

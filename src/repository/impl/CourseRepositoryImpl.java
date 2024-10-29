@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
 import static util.Color.RED;
 import static util.Color.RESET;
 
@@ -127,13 +126,7 @@ public class CourseRepositoryImpl implements CourseRepository {
         return courseTitle;
     }
 
-    @Override
-    public void studentGetCourse(Long studentId, Long courseId) throws SQLException {
-        PreparedStatement pr = this.database.getPreparedStatement(Constant.STUDENT_GET_COURSE);
-        pr.setLong(1,studentId);
-        pr.setLong(2,courseId);
-        pr.executeUpdate();
-    }
+
 
     @Override
     public void deleteStudentCourse(Long id) throws SQLException {

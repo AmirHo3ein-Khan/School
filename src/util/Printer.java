@@ -8,7 +8,7 @@ import static util.Color.RESET;
 public class Printer {
     public static void printMenu(String[] menu , String message) {
         System.out.println(CYAN+"* * * "+CYAN+ message +RESET+CYAN+" * * *"+RESET);
-        System.out.println(PURPLE+"===================="+RESET);
+        System.out.println(PURPLE+"*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*"+RESET);
         for (int i = 0; i < menu.length; i++) {
             System.out.printf(CYAN+"%d. %s \n"+RESET , i+1 , CYAN + menu[i] + RESET);
         }
@@ -24,7 +24,7 @@ public class Printer {
     }
     public static void printLine (int numberOfLine){
         for (int i = 0; i <= numberOfLine; i++) {
-            System.out.print(PURPLE+"="+RESET);
+            System.out.print(PURPLE+"*-"+RESET);
         }
         System.out.println();
     }

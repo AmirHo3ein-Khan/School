@@ -1,7 +1,5 @@
 package model;
-
 import model.enumtype.UserType;
-
 import java.sql.Date;
 
 public class Teacher extends User{
@@ -29,10 +27,4 @@ public class Teacher extends User{
         this.courseId = courseId;
     }
 
-    @Override
-    public String toString() {
-        return "Teacher{" +
-                "courseId=" + courseId +
-                '}';
-    }
 }

@@ -11,12 +11,12 @@ import service.impl.*;
 public class ApplicationContext {
     public static String [] starterMenu = {"Sign In","EXIT"};
     public static String [] managerMenu = {"STUDENT","TEACHER","COURSES","EXAMS","EXIT"};
-    public static String [] managerStudentsMenu = {"CREAT ","UPDATE","DELETE","ALL STUDENTS","COUNT OF STUDENTS","FIND STUDENT BY ID","EXIT"};
+    public static String [] managerStudentsMenu = {"CREAT ","UPDATE","DELETE","SET COURSE FOR STUDENT","ALL STUDENTS","COUNT OF STUDENTS","FIND STUDENT BY ID","EXIT"};
     public static String [] managerTeacherMenu = {"CREAT ","UPDATE","DELETE","ALL TEACHER","COUNT OF TEACHER","FIND TEACHER BY ID","EXIT"};
     public static String [] managerCoursesMenu = {"CREAT ","UPDATE","DELETE","ALL COURSES","COUNT OF COURSES","FIND COURSES BY ID","EXIT"};
     public static String [] managerExamsMenu = {"CREAT ","UPDATE","DELETE","ALL EXAMS","COUNT OF EXAMS","FIND EXAMS BY ID","EXIT"};
-    public static String [] studentMenu = {"GIVE COURSE","DELETE YOUR COURSES","SEE YOUR EXAMS","ALL YOUR COURSES","EXIT"};
-    public static String [] teacherMenu = {"CREAT A EXAM ","UPDATE EXAM","EXIT"};
+    public static String [] studentMenu = {"SEE YOUR EXAMS","SEE YOUR COURSES","SEE YOUR GRADS","EXIT"};
+    public static String [] teacherMenu = {"CREAT A EXAM ","UPDATE EXAM","ADD STUDENT GRADE","EXIT"};
 
 
     private static StudentRepository studentRepository;

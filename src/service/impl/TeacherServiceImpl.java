@@ -1,12 +1,14 @@
 package service.impl;
 
 import exception.NotFoundException;
+import exception.RepetitiveUsernameException;
 import model.Exam;
 import model.Teacher;
 import model.dto.TeacherDto;
 import repository.ExamRepository;
 import repository.TeacherRepository;
 import service.TeacherService;
+import util.Printer;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Optional;
@@ -26,8 +28,8 @@ public class TeacherServiceImpl implements TeacherService {
     public void creat(Teacher entity) {
         try {
             teacherRepository.creat(entity);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        } catch (SQLException | RepetitiveUsernameException e) {
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -36,7 +38,7 @@ public class TeacherServiceImpl implements TeacherService {
         try {
             teacherRepository.update(entity);
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -57,7 +59,7 @@ public class TeacherServiceImpl implements TeacherService {
                 return Optional.of(teacherDto);
             }
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return Optional.empty();
     }
@@ -68,7 +70,7 @@ public class TeacherServiceImpl implements TeacherService {
         try {
             teacherRepository.delete(id);
         } catch (SQLException | NotFoundException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
     }
 
@@ -90,9 +92,19 @@ public class TeacherServiceImpl implements TeacherService {
             }
             return teachersDto;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return teachersDto;
+    }
+
+    @Override
+    public Long getCourseIdThatTeacherTeach(Long id) {
+        try {
+            return teacherRepository.getCourseIdThatTeacherTeach(id);
+        } catch (SQLException e) {
+            Printer.printError(e.getMessage());
+        }
+        return null;
     }
 
 
@@ -102,7 +114,7 @@ public class TeacherServiceImpl implements TeacherService {
         try {
             count = this.teacherRepository.getCount();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
         return count;
     }
@@ -111,7 +123,7 @@ public class TeacherServiceImpl implements TeacherService {
         try {
             this.examRepository.creat(exam);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            Printer.printError(e.getMessage());
         }
     }
 }

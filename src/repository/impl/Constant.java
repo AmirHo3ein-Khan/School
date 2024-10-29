@@ -36,14 +36,34 @@ public class Constant {
     //language=SQL
     protected static final String GET_USER_ID_FROM_STUDENT =
             "select u.id from student s inner join users u on s.user_id = u.id where s.user_id = ?;";
+    //language=SQL
+    protected static final String GET_EXAM_ID_FOR_ADD_STUDENT =
+            "select e.exam_id from course_student cs\n" +
+                    "inner join exam e\n" +
+                    "on cs.course_id = e.course_id";
+    //language=SQL
+    protected static final String ADD_STUDENT_TO_EXAM =
+            "insert into student_exam (student_id, exam_id)\n" +
+                    "values (?,?);";
+
+    //language=SQl
+    protected static final String SEE_GRAD_OF_STUDENT =
+            "select c.course_title , se.student_grade from student_exam se\n" +
+                    "inner join student s\n" +
+                    "on se.student_id = s.user_id\n" +
+                    "inner join exam e\n" +
+                    "on se.exam_id = e.exam_id\n" +
+                    "inner join course c\n" +
+                    "on e.course_id = c.course_id\n" +
+                    "where se.student_id = ?;";
     //***********************************************************************************************
 
     //Query for student and teacher
     //language=SQl
     protected static final String DELETE_USER = "delete from users u where u.id = ?;";
     //language=SQL
-    protected static final String GET_USER_DATA_FOR_FIND =
-            "select * from users u where u.id = ?";
+    protected static final String GET_COUNT_USERNAME =
+            "select count(*) from users u where u.username = ?;";
     //***********************************************************************************************
 
     //Teacher Queries
@@ -81,6 +101,14 @@ public class Constant {
                     "inner join teacher t\n" +
                     "on t.course_id = c.course_id\n" +
                     "where t.user_id = ? ; ";
+    //language=SQl
+    protected static final String GET_COURSE_ID_THAT_TEACHER_TEACH =
+            "select c.course_id \n" +
+                    "from course c\n" +
+                    "inner join teacher t\n" +
+                    "on t.course_id = c.course_id\n" +
+                    "where t.user_id = ? ; ";
+
     //language=SQL
     protected static final String GET_FULL_NAME_OF_TEACHER_THAT_TAKEN_EXAM =
             "select concat (u.first_name , ' ' , u.last_name) as fullname\n" +
@@ -103,9 +131,7 @@ public class Constant {
     protected static final String FIND_COURSE_BY_ID = "select * from course where course_id = ?";
     //language=SQl
     protected static final String FIND_EXAM_ID_FOR_DELETE_FROM_STUDENT_EXAM =
-            "select e.exam_id\n" +
-                    "from exam e\n" +
-                    "where e.course_id = ?;";
+            "select e.exam_id from exam e where e.course_id = ?;";
     //language=SQl
     protected static final String GET_ALL_COURSES = "select * from course";
     //language=SQl
@@ -147,7 +173,13 @@ public class Constant {
     //language=SQl
     protected static final String DELETE_STUDENT_EXAM_FOR_DELETE_EXAM = "delete from student_exam where exam_id = ?;";
     //language=SQl
+    protected static final String GET_EXAM_ID_FOR_DELETE_EXAM = "select * from exam where teacher_id = ?";
+    //language=SQl
     protected static final String GET_ALL_EXAMS = "select * from exam;";
+    //language=SQl
+    protected static final String UPDATE_EXAM_GRADE = "update student_exam set student_grade = ? where student_id = ? and exam_id = ?;";
+    //language=SQl
+    protected static final String GET_EXAM_ID_THAT_TEACHER_TEACH = "select exam_id from exam where teacher_id = ?;";
     //***********************************************************************************************
 
     //Manager Queries
@@ -157,11 +189,17 @@ public class Constant {
 
     //User Queries
     //language=SQL
+    //language=SQL
+    protected static final String GET_USER_DATA_FOR_FIND =
+            "select * from users u where u.id = ?";
     protected static final String FIND_USER_TYPE_WITH_USERNAME_AND_PASSWORD =
             "select user_type from users where username = ? and password = ?;";
     //language=SQL
     protected static final String FIND_USER_ID_WITH_USERNAME_AND_PASSWORD =
             "select id from users where username = ? and password = ?;";
+    //language=SQL
+    protected static final String UPDATE_PASSWORD =
+            "update users set password = ? where national_code = ?;";
     //***********************************************************************************************
 
     //Course Student Queries
@@ -190,7 +228,5 @@ public class Constant {
 
 
     //***********************************************************************************************
-
-
 }
 

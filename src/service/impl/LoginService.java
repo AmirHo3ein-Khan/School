@@ -51,4 +51,11 @@ public class LoginService {
         }
         return Optional.empty();
     }
+    public void updatePassword(String newPassword,String nationalCode){
+        try {
+            userRepository.updatePassword(newPassword,nationalCode);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

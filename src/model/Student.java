@@ -29,10 +29,4 @@ public class Student extends User{
         this.gpu = gpu;
     }
 
-    @Override
-    public String toString() {
-        return "Student{" +
-                "gpu=" + gpu +
-                '}';
-    }
 }

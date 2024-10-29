@@ -6,7 +6,6 @@ import java.util.Set;
 
 public interface CourseRepository extends BaseRepository <Course> {
     String getCourseTitleOfExamByExamId(Long id) throws SQLException;
-    void studentGetCourse(Long studentId , Long courseId) throws SQLException;
     void deleteStudentCourse(Long id) throws SQLException;
     Set<String> getAllCourseTitleOfStudent(Long studentId)throws SQLException;
 }

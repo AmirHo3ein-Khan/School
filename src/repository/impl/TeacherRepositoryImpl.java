@@ -2,6 +2,7 @@ package repository.impl;
 
 import database.Database;
 import exception.NotFoundException;
+import exception.RepetitiveUsernameException;
 import model.Teacher;
 import repository.TeacherRepository;
 import java.sql.*;
@@ -15,7 +16,8 @@ public class TeacherRepositoryImpl implements TeacherRepository {
     private final Database database = new Database();
 
     @Override
-    public void creat(Teacher entity) throws SQLException {
+    public void creat(Teacher entity) throws SQLException , RepetitiveUsernameException{
+        checkRepetitiveUsername(entity.getUsername());
         PreparedStatement pr = database.getPreparedStatementAndColumnIndexes(Constant.CREAT_USER_TEACHER, Statement.RETURN_GENERATED_KEYS);
         pr.setString(1, entity.getFirstName());
         pr.setString(2, entity.getLastName());
@@ -34,6 +36,20 @@ public class TeacherRepositoryImpl implements TeacherRepository {
         pr.setLong(1, userId);
         pr.setLong(2, entity.getCourseId());
         pr.executeUpdate();
+    }
+    private void checkRepetitiveUsername(String username) throws SQLException {
+        checkRepetitiveUsername(username, this.database);
+    }
+
+    static void checkRepetitiveUsername(String username, Database database) throws SQLException {
+        PreparedStatement ps = database.getPreparedStatement(Constant.GET_COUNT_USERNAME);
+        ps.setString(1,username);
+        ResultSet resultSet = ps.executeQuery();
+        while (resultSet.next()){
+            int countUsername = resultSet.getInt("count");
+            if (countUsername>0)
+                throw new RepetitiveUsernameException("Username already exist!\nnot added at database!");
+        }
     }
 
     @Override
@@ -103,9 +119,13 @@ public class TeacherRepositoryImpl implements TeacherRepository {
     @Override
     public void delete(Long id) throws SQLException, NotFoundException {
         if (findById(id).isPresent()) {
-            PreparedStatement pr = this.database.getPreparedStatement(Constant.DELETE_EXAM_FOR_TEACHER);
-            pr.setLong(1, id);
+            PreparedStatement pr = this.database.getPreparedStatement(Constant.DELETE_STUDENT_EXAM_FOR_DELETE_EXAM);
+            pr.setLong(1, getExamIdForDeleteExam(id));
+            pr.executeUpdate();
 
+            pr = this.database.getPreparedStatement(Constant.DELETE_EXAM_FOR_TEACHER);
+            pr.setLong(1, id);
+            pr.executeUpdate();
 
             pr = database.getPreparedStatement(Constant.DELETE_TEACHER);
             pr.setLong(1, id);
@@ -116,6 +136,16 @@ public class TeacherRepositoryImpl implements TeacherRepository {
         } else {
             throw new NotFoundException(RED+"Teacher with ID " + id + " not found."+RESET);
         }
+    }
+    private Long getExamIdForDeleteExam(Long teacherId)throws SQLException{
+        PreparedStatement pr = this.database.getPreparedStatement(Constant.GET_EXAM_ID_FOR_DELETE_EXAM);
+        pr.setLong(1,teacherId);
+        ResultSet resultSet = pr.executeQuery();
+        Long examId = 0L;
+        while (resultSet.next()){
+            examId = resultSet.getLong("exam_id");
+        }
+        return examId;
     }
 
     @Override
@@ -154,6 +184,18 @@ public class TeacherRepositoryImpl implements TeacherRepository {
             courseTitleThatTeacherTeach = resultSet.getString("course_title");
         }
         return courseTitleThatTeacherTeach;
+    }
+
+    @Override
+    public Long getCourseIdThatTeacherTeach(Long id) throws SQLException {
+        PreparedStatement pr = this.database.getPreparedStatement(Constant.GET_COURSE_ID_THAT_TEACHER_TEACH);
+        pr.setLong(1,id);
+        ResultSet resultSet = pr.executeQuery();
+        Long courseId = 0L;
+        while (resultSet.next()){
+            courseId = resultSet.getLong("course_id");
+        }
+        return courseId;
     }
 
     @Override

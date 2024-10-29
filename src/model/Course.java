@@ -29,11 +29,4 @@ public class Course extends BaseModel{
         this.unite = unite;
     }
 
-    @Override
-    public String toString() {
-        return "Course{" +
-                "title='" + title + '\'' +
-                ", unite=" + unite +
-                '}';
-    }
 }
